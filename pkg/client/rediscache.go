@@ -1,7 +1,7 @@
 package client
 
 import (
-	"fmt"
+	"encoding/json"
 	"github.com/go-redis/redis/v7"
 	"time"
 )
@@ -70,13 +70,13 @@ func (r *redisCache) DeleteList(key string) error {
 
 func (r redisCache) Set(key string, value interface{}) error {
 	client := r.getClient()
-	fmt.Println(key, value)
-	//json, err := json.Marshal(value)
-	//if err != nil {
-	//	panic(err)
-	//}
+	// fmt.Println(key, value)
+	json, err := json.Marshal(value)
+	if err != nil {
+		panic(err)
+	}
 
-	err := client.Set(key, value, r.expires*time.Second).Err()
+	err = client.Set(key, json, r.expires*time.Second).Err()
 	if err != nil {
 		return err
 	}
@@ -84,15 +84,17 @@ func (r redisCache) Set(key string, value interface{}) error {
 }
 
 func (r redisCache) Get(key string) (interface{}, error) {
+	var value interface{}
 	client := r.getClient()
-	fmt.Println(key)
+	// fmt.Println(key)
 	val, err := client.Get(key).Result()
-
 	if err != nil {
 		return "", err
 	}
 
-	return val, nil
+	err = json.Unmarshal([]byte(val), &value)
+
+	return value, nil
 	// room :=
 }
 
