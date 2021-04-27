@@ -13,10 +13,17 @@ func main()  {
 		"lastname": "world",
 	}
 
-	redis.Set(key, sample)
-	data, err := redis.Get(key)
+	sample2 := map[string]interface{} {
+		"firstname": "hello2",
+		"lastname": "world1",
+	}
+
+	redis.Create(key, sample)
+	data, err := redis.Read(key)
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println("data", data)
+	redis.Update(key, sample2)
+	fmt.Println(data)
 }
