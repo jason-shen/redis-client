@@ -25,5 +25,6 @@ func main()  {
 	}
 	fmt.Println("data", data)
 	redis.Update(key, sample2)
-	fmt.Println(data)
+	data2, err := redis.Read(key)
+	fmt.Println(data2)
 }

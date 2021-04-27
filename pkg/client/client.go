@@ -15,9 +15,9 @@ type Redisclient interface {
 
 type Item struct {
 	data map[string]interface{}
+	key string
 }
 
 type Items struct {
-	key string
 	items Item
 }

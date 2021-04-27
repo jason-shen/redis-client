@@ -15,13 +15,12 @@ type redisCache struct {
 	data Items
 }
 
-//func NewItems(key string) *Items {
-//	var item = &Items{
-//		key: key,
-//		items: make(map[string]Item),
-//	}
-//	return item
-//}
+func NewItems(key string) *Items {
+	var item = &Items{
+		items: Item{key: key, data: make(map[string]interface{})},
+	}
+	return item
+}
 
 func NewRedisCache(host string, password string, db int, exp time.Duration) Redisclient {
 	return &redisCache{
@@ -126,25 +125,27 @@ func (r *redisCache) Read(key string) (interface{}, error) {
 }
 
 func (r *redisCache) Update(key string, value interface{}) error {
-
 	prev, err := r.Read(key)
 	if err != nil {
 		return err
 	}
-	result := prev.(Item)
+	result := prev.(map[string]interface{})
 
 	val := Items{
-		key: key,
-		items: result,
+		items: Item{key: key, data: result},
 	}
+ fmt.Println("key", val.items.key)
+	m := NewItems(key)
+	m.items.data[val.items.key] = val
+	fmt.Println("<>M", m.items)
 
-	r.data.items = val.items
 
-	if val.key == key {
+	if val.items.key == key {
 		fmt.Println("value", value)
-		fmt.Println("r data", r.data.items)
-		r.data.items.data = value.(map[string]interface{})
-		err := r.Create(key, r.data)
+		fmt.Println("r data", r.data.items.data, "key", val.items.key)
+		m.items.data[val.items.key] = value.(map[string]interface{})
+		fmt.Println("after data", r.data.items.data)
+		err := r.Create(key, r.data.items.data)
 		if err != nil {
 			return err
 		}
