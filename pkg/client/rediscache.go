@@ -2,8 +2,8 @@ package client
 
 import (
 	"encoding/json"
-	"fmt"
 	"github.com/go-redis/redis/v7"
+	"strconv"
 	"time"
 )
 
@@ -17,7 +17,8 @@ type redisCache struct {
 
 func NewItems(key string) *Items {
 	var item = &Items{
-		items: Item{key: key, data: make(map[string]interface{})},
+		key: key,
+		items: Item{data: make(map[string]interface{})},
 	}
 	return item
 }
@@ -98,29 +99,32 @@ func (r redisCache) Get(key string) (string, error) {
 
 func (r *redisCache) Create(key string, value interface{}) error {
 	client := r.getClient()
-	// fmt.Println(key, value)
-	json, err := json.Marshal(value)
+	//fmt.Println("creating", value)
+	item, err := json.Marshal(value)
 	if err != nil {
 		panic(err)
 	}
-
-	err = client.Set(key, json, r.expires*time.Second).Err()
+	//fmt.Println("Json", item)
+	err = client.Set(key, item, r.expires*time.Second).Err()
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
 func (r *redisCache) Read(key string) (interface{}, error) {
-	var value interface{}
+	var value map[string]interface{}
 	client := r.getClient()
 	val, err := client.Get(key).Result()
 	if err != nil {
-		return "", err
+		return err, nil
 	}
 
 	err = json.Unmarshal([]byte(val), &value)
-
+	if err != nil {
+		return err, nil
+	}
 	return value, nil
 }
 
@@ -132,20 +136,23 @@ func (r *redisCache) Update(key string, value interface{}) error {
 	result := prev.(map[string]interface{})
 
 	val := Items{
-		items: Item{key: key, data: result},
+		key: key,
+		items: Item{data: result},
 	}
- fmt.Println("key", val.items.key)
+
+	//fmt.Println("values", val.items.data)
+	i := strconv.Itoa(len(val.items.data))
 	m := NewItems(key)
-	m.items.data[val.items.key] = val
-	fmt.Println("<>M", m.items)
+	m.items.data[i] = val.items.data
 
 
-	if val.items.key == key {
-		fmt.Println("value", value)
-		fmt.Println("r data", r.data.items.data, "key", val.items.key)
-		m.items.data[val.items.key] = value.(map[string]interface{})
-		fmt.Println("after data", r.data.items.data)
-		err := r.Create(key, r.data.items.data)
+	if val.key == key {
+		//fmt.Println("before data", m.items.data, "key", val.key)
+		//fmt.Println("input value", value)
+		i := strconv.Itoa(len(m.items.data))
+		m.items.data[i] = value.(map[string]interface{})
+		//fmt.Println("after data", m.items.data, "key", val.key)
+		err := r.Create(key, m.items.data)
 		if err != nil {
 			return err
 		}
