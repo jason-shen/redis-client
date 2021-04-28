@@ -49,7 +49,10 @@ data3, err := redis.Read(key)
 fmt.Println("object update 2", data3)
 }
 ```
-please see the example folder
+**result** 
+
+![image](./screenshots/result.png)
+for the full code please see the example folder
 
 ## Dependencies
 - [go-redis](github.com/go-redis/redis/)
