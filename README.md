@@ -12,7 +12,7 @@ redis client library is to make easy to do crud with json object in redis
 
 ## Installing the Library
 ```textmate
-git clone https://github.com/jason-shen/redis-client.git
+go get https://github.com/jason-shen/redis-client
 ```
 
 ## Usage 
