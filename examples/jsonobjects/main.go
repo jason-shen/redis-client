@@ -31,11 +31,11 @@ func main()  {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println("data once", data)
+	fmt.Println("object create", data)
 	redis.Update(key, sample2)
 	data2, err := redis.Read(key)
-	fmt.Println(data2)
+	fmt.Println("object update 1", data2)
 	redis.Update(key, sample3)
 	data3, err := redis.Read(key)
-	fmt.Println(data3)
+	fmt.Println("object update 2", data3)
 }
